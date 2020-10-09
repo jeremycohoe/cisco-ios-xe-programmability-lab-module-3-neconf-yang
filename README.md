@@ -2,11 +2,17 @@
 
 ## Module: NETCONF + YangSuite
 
+## IOS XE Release: 17.3
+
 ## Module Topics:
 
 Introduction to NETCONF/YANG
 
 Enable NETCONF/YANG
+
+Tooling: NCC the NETCONF-console
+
+NACM Read-Only and the Role Based Access Control (RBAC)
 
 YANGSuite
 
@@ -42,6 +48,117 @@ transport input all
 C9300#sh run | i netconf
 netconf-yang
 ```
+
+
+## Tooling: NCC, NETCONF-console, NCClient
+
+NCC is essential tooling when working with NETCONF and can be found at https://github.com/CiscoDevNet/ncc. The NCClient tooling is also useful from https://github.com/CiscoDevNet/ncclient as is NETCONF-console from https://pypi.org/project/netconf-console/
+
+The required NETCONF tooling has been preinstalled into the lab envrionment's python3 virtual envrionment 'v' with the ncc folder. 
+
+###Access the virtual envrionment:
+
+
+**cd ; cd ncc**
+
+**virtualenv v**
+
+**source v/bin/activate**
+
+
+The steps to instal the tooling is below, which has been taken from the Github pages above.
+
+```
+auto@programmability:~$ git clone https://github.com/CiscoDevNet/ncc
+Cloning into 'ncc'...
+remote: Enumerating objects: 7, done.
+remote: Counting objects: 100% (7/7), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 1014 (delta 0), reused 1 (delta 0), pack-reused 1007
+Receiving objects: 100% (1014/1014), 416.66 KiB | 4.63 MiB/s, done.
+Resolving deltas: 100% (563/563), done.
+
+auto@programmability:~$ cd ncc
+
+auto@programmability:~/ncc$ virtualenv v
+created virtual environment CPython3.8.5.final.0-64 in 370ms
+  creator CPython3Posix(dest=/home/auto/ncc/v, clear=False, global=False)
+  seeder FromAppData(download=False, pyparsing=latest, contextlib2=latest, ipaddr=latest, requests=latest, colorama=latest, chardet=latest, six=latest, retrying=latest, pkg_resources=latest, CacheControl=latest, webencodings=latest, progress=latest, pep517=latest, msgpack=latest, appdirs=latest, packaging=latest, certifi=latest, pip=latest, wheel=latest, idna=latest, distro=latest, html5lib=latest, lockfile=latest, setuptools=latest, pytoml=latest, urllib3=latest, distlib=latest, via=copy, app_data_dir=/home/auto/.local/share/virtualenv/seed-app-data/v1.0.1.debian)
+  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator,XonshActivator
+
+auto@programmability:~/ncc$ source v/bin/activate
+
+(v) auto@programmability:~/ncc$ pip install --upgrade pip
+(v) auto@programmability:~/ncc$ pip install -r requirements.txt
+(v) auto@programmability:~/ncc$ pip install --upgrade git+https://github.com/CiscoDevNet/ncclient.git
+(v) auto@programmability:~/ncc$ pip install netconf-console
+```
+
+Now that the tooling is accessible explore the use case examples
+
+### NETCONF-console for GET-config
+
+The NETCONF-console tooling is a simple way to work with the NETCONF API and it is a fully featured tooling, meaning it supports most NETCONF operations and features.
+
+Use the NETCONF-console tooling to connect to the device and get the running configuration. Specify the **host, port, username, password, and the operation of get-config**
+
+**netconf-console --host 10.1.1.5 --port 830 -u admin -p Cisco123 --get-config**
+
+The output should look similar to the below:
+
+![](imgs/netconf-console-get-config.png)
+
+### NETCONF-console for Interface description example use case
+
+NETCONF-console can also be used to send XML payloads that we generated with YDK, YANGSuite, pYang, or other similar tooling. In this example the XML payload is used to update some interface descriptions. 
+
+In this case the XML is generated from the Cisco-IOS-XE-native.YANG model within the interfaces/GigabitEthernet container. The XML was generated using YANGSuite
+
+![](imgs/YANGSuite-interface-desc.png)
+
+We can expand on the XML and modify it for mutiple interfaces as desired:
+
+```
+  <native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
+        <interface>
+          <GigabitEthernet><name>1/0/1</name><description>Configured 1 NETCONF</description></GigabitEthernet>
+          <GigabitEthernet><name>1/0/2</name><description>Configured 2 NETCONF</description></GigabitEthernet>
+          <GigabitEthernet><name>1/0/3</name><description>Configured 3 NETCONF</description></GigabitEthernet>
+        </interface>
+      </native>
+```
+
+To send the XML payload, use the following NETCONF-console command. The XML from above is specified in the change_interface_description.xml file that NETCONF-console reads and sends to the device.
+
+**netconf-console --host=10.1.1.5 --port 830 --db running --lock --edit-config=change_interface_description.xml --unlock --user admin --password Cisco123**
+
+To validate that the XML was succesfully sent the configuration of the the interfaces/descriptions can be retreived over NETCONF. This would be similar to "show interface status" CLI
+
+**netconf-console --host 10.1.1.5 --port 830 -u admin -p Cisco123 --get-config --x /interfaces/interface**
+
+![](imgs/netconf-console-xml-get.png)
+
+In the above example there are 3 commands that are executed:
+
+1. Read the XML payload file that will be sent
+2. Send the XML payload to the NETCONF interface
+3. Get the interface description configuration from NETCONF
+
+The commands used are:
+
+**cat change\_interface\_description.xml**
+
+**netconf-console --host=10.1.1.5 --port 830 --db running --lock --edit-config=change\_interface\_description.xml --unlock --user admin --password Cisco123**
+
+**netconf-console --host 10.1.1.5 --port 830 -u admin -p Cisco123 --get-config --x /interfaces/interface/description**
+
+
+
+## NACM Read-Only and the Role Based Access Control (RBAC)
+
+Add content here :)
+
+
 
 ## YANGSuite
 
