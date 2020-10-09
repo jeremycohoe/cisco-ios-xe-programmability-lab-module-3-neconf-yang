@@ -39,14 +39,19 @@ aaa session-id common
 C9300#sh run | sec vty
 
 line vty 0 4
-exec-timeout 0 0
-transport input all
+ exec-timeout 0 0
+ length 0
+ transport input all
 line vty 5 15
-exec-timeout 0 0
-transport input all
+ exec-timeout 0 0
+ length 0
+ transport input all
 
 C9300#sh run | i netconf
 netconf-yang
+
+C9300#show run | i username
+username admin privilege 15 secret 9 ....
 ```
 
 
