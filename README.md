@@ -139,7 +139,7 @@ To send the XML payload, use the following NETCONF-console command. The XML from
 
 To validate that the XML was succesfully sent the configuration of the the interfaces/descriptions can be retreived over NETCONF. This would be similar to "show interface status" CLI
 
-**netconf-console --host 10.1.1.5 --port 830 -u admin -p Cisco123 --get-config --x /interfaces/interface**
+**netconf-console --host 10.1.1.5 --port 830 -u admin -p Cisco123 --get-config --x /interfaces/interface/description**
 
 ![](imgs/netconf-console-xml-get.png)
 
